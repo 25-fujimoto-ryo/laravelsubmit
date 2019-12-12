@@ -10,23 +10,45 @@ use App\Http\Controllers\Controller;
 class ProfileController extends Controller
 {
     //
-     public function add()
+    public function add()
     {
         return view('admin.profile.create');
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        $this->validate($request, Profile::$rules);
+
+        $profiles = new Profile;
+        $form = $request->all();
+        
+        unset($form['_token']);
+        
+        $profiles->fill($form);
+        $profiles->save();
         return redirect('admin/profile/create');
     }
 
-    public function edit()
-    {
-        return view('admin.profile.edit');
+    public function edit(Request $request)
+    {   
+        $profiles = Profile::find($request->id);
+        if (empty($profiles)) {
+        abort(404);    
+        }
+        return view('admin.profile.edit', ['profiles_form' => $profiles]);
     }
 
-    public function update()
+    public function update(Request $request)
     {
-        return redirect('admin/profile/edit');
+        $this->validate($request, Profile::$rules);
+
+        $profiles = Profile::find($request->id);
+        $profiles_form = $request->all();
+        
+        unset($profiles_form['_token']);
+
+        $profiles->fill($profiles_form)->save();
+
+        return redirect('admin/profile/create');
     }
 }
